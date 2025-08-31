@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 @./.claude/templates/PROJECT_OVERVIEW_template.md
 @./.claude/agents/agent-creator.md
 @./.claude/agents/documentation-generator.md
-@./.claude/ageents/02-language-specialists/python-pro.md
+@./.claude/agents/02-language-specialists/python-pro.md
 @./.claude/agents/05-data-ai/data-engineer.md
 
 ## Project Overview
