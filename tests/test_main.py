@@ -49,6 +49,7 @@ class TestCLI:
         with self.runner.isolated_filesystem():
             # Copy the sample PDF to the isolated filesystem
             import shutil
+
             isolated_pdf = Path("sample.pdf")
             shutil.copy2(sample_pdf, isolated_pdf)
 

@@ -1,0 +1,71 @@
+# PDF Ingestion Pipeline Configuration
+
+[input]
+# Directory to watch for new PDF files
+dir = "./inbox"
+# File pattern to match (glob pattern)
+pattern = "*.pdf"
+# File type to process
+file_type = "pdf"
+
+[output]
+# JSONL output directory template
+# Available placeholders: {stem}, {hash}, {ts}
+jsonl_dir = "./outputs/jsonl/{stem}-{hash}.jsonl"
+# Markdown output directory template
+# Available placeholders: {stem}, {hash}, {ts}
+markdown_dir = "./outputs/markdown/{stem}-{hash}.md"
+
+[llamaparse]
+# LlamaParse API key (can be set via LLAMAPARSE_API_KEY environment variable)
+api_key = ""
+# API base URL
+base_url = "https://api.llamaindex.ai/api/v1"
+# Request timeout in seconds
+timeout = 120
+
+[processed]
+# Directory to move successfully processed files
+dir = "./processed"
+# Whether to overwrite files with duplicate names
+overwrite_on_dup = true
+
+[quarantine]
+# Directory to move failed files
+dir = "./quarantine"
+
+[concurrency]
+# Maximum number of worker threads for processing
+max_workers = 10
+
+[retry]
+# Maximum retry attempts for LlamaParse API calls
+max_attempts = 3
+# Initial backoff time in milliseconds
+initial_backoff_ms = 500
+# Maximum backoff time in milliseconds
+max_backoff_ms = 5000
+# Whether to add jitter to backoff timing
+jitter = true
+
+[redaction]
+# Whether to redact account numbers to last-4 format
+account_numbers = true
+
+[logging]
+# Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+level = "INFO"
+# Log directory
+dir = "./logs"
+# Log file rotation - daily
+rotate_daily = true
+# Number of backup log files to keep
+backup_count = 7
+
+[state]
+# Directory for state files (ledger.json)
+dir = "./state"
+
+[runs]
+# Directory for run reports
+dir = "./runs"
