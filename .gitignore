@@ -1,1 +1,10 @@
 *.pyc
+
+*.env
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/

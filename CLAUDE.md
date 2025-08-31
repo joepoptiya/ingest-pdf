@@ -19,6 +19,77 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Python 3.11.13+ PDF ingestion component that watches a configured folder for new files, hot-reloads its root config.toml, ingests each file through LlamaParse, redacts full account numbers to last-4, writes JSONL and Markdown outputs, and manages idempotency via SHA256 with a simple JSON ledger. Built with modern Python features and comprehensive tooling.
 
+## Automation: Overview-to-Tasks (docs/)
+
+When PROJECT_OVERVIEW.md is open and I say “Generate tasks — plan only”:
+
+- Find the section with the exact heading: Task Seeds (YAML).
+- Parse the fenced yaml code block under that heading; it must contain a top-level `tasks:` list.
+- Allocate sequential zero-padded IDs (TASK-0001, TASK-0002, …) ordered by `id_hint` (asc), then `title` (case-insensitive).
+- For each seed, build a task file at: docs/TASK-####-<kebab-title>.md using the atomic task template (frontmatter + sections listed below).
+- Build/refresh docs/INDEX.md with a table of TASK ID, title, epic, owner, priority.
+- In plan mode: only show the full file list and previews of the first two tasks; do not write files.
+
+When I say “Generate tasks — apply the plan”:
+
+- Perform the same parsing and then write the files to disk (create docs/ if needed).
+- Overwrite existing docs/TASK-*.md and docs/INDEX.md deterministically.
+- Never execute any Commands during generation.
+
+Atomic task template sections (to populate from seeds):
+
+- Frontmatter: id, title, status=Pending, priority, owner, parent (epic), created (today), timebox, labels, environments, require_confirm (default: [publish, deploy, delete, network-external])
+- Summary (from `objective`)
+- Prerequisites
+- Objective (Outcomes)
+- Scope (In-Scope / Out-of-Scope)
+- Components to Install
+- Commands (preserve `type`, `cwd`, and `run` order verbatim)
+- File Changes (verbatim unified patches)
+- Acceptance Criteria
+- Verification
+- Rollback
+- Definition of Done (standard checklist)
+
+Seeds → template mapping:
+
+- title → title
+- epic → parent
+- owner → owner
+- priority → priority (default P2)
+- timebox → timebox (default 90m)
+- environments, labels, prerequisites → same-named sections
+- objective → Summary + Objective
+- in_scope / out_of_scope → Scope subsections
+- commands[].{type,cwd,run[]} → Commands
+- file_changes[].{path,intent,patch} → File Changes
+- acceptance → Acceptance Criteria
+- verification → Verification
+- require_confirm → frontmatter require_confirm (fallback to default)
+
+Safety:
+
+- Only write under docs/* (and docs/INDEX.md). No external calls, no command execution during generation.
+- If the heading or YAML is missing/invalid, stop and report the exact error.
+
+## Execution: Atomic Tasks (docs/)
+
+When a docs/TASK-*.md file is open and I say “Run TASK-#### — plan only”:
+
+- Parse sections (Commands, File Changes, Acceptance, Verification, Rollback).
+- Propose the exact steps and show file diffs; do not execute anything.
+
+When I say “Run TASK-#### — apply”:
+
+- Execute Commands in order (respect `cwd`), apply File Changes as unified patches, and stop on errors.
+- Ask for confirmation before risky actions: publish, deploy, delete, network-external (per `require_confirm`).
+- On success, create docs/summaries/TASK-####-summary.md with Evidence (key outputs, logs, PR/CI links) and results.
+
+Limits:
+
+- Only execute when I explicitly say “apply”.
+- Only write within "docs/*" and "docs/summaries/*".
+
 ## Essential Commands
 
 ### Development Setup
@@ -224,11 +295,13 @@ Or simply run: `make check` to execute all quality checks at once.
 ## Key Files & Directories
 
 ### Configuration
+
 - **config.toml**: Root configuration file with hot-reload capability
 - **pyproject.toml**: Package and tool configuration (pytest, ruff, black, mypy)
 - **Makefile**: Common development commands
 
 ### Runtime Directories
+
 - **inbox/**: Input directory for PDFs (configurable)
 - **outputs/**: JSONL and Markdown outputs with templated paths
 - **processed/**: Successfully processed files moved here
@@ -238,6 +311,7 @@ Or simply run: `make check` to execute all quality checks at once.
 - **runs/**: Per-run JSONL files and latest.json summary
 
 ### Development
+
 - **.pre-commit-config.yaml**: Git hooks for code quality
 - **tests/**: Unit and integration tests with TDD approach
 - **CLAUDE.md**: This guidance file
