@@ -81,8 +81,8 @@ None specified.
 
 ## Definition of Done
 
-- [ ] All acceptance criteria verified
-- [ ] Tests updated/passing
-- [ ] Docs updated
-- [ ] Observability updated (if applicable)
-- [ ] task_summary.md created under summaries/tasks/TASK-0001-summary.md
+- [x] All acceptance criteria verified
+- [x] Tests updated/passing (N/A for scaffolding task)
+- [x] Docs updated
+- [x] Observability updated (N/A for this task)
+- [x] task_summary.md created under summaries/tasks/TASK-0001-summary.md

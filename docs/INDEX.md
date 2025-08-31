@@ -7,7 +7,7 @@ Generated from PROJECT_OVERVIEW.md Task Seeds (YAML) on 2025-08-31
 
 | Task ID | Title | Owner | Priority | Epic | Status |
 |---------|-------|-------|----------|------|--------|
-| [TASK-0001](./TASK-0001-initialize-uv-project-and-repo-scaffolding.md) | Initialize UV project and repo scaffolding | @you | P1 | EPIC-0002 | Pending |
+| [TASK-0001](./TASK-0001-initialize-uv-project-and-repo-scaffolding.md) | Initialize UV project and repo scaffolding | @you | P1 | EPIC-0002 | Done |
 | [TASK-0002](./TASK-0002-implement-config-toml-loader-with-hot-reload.md) | Implement config.toml loader with hot reload | @you | P1 | EPIC-0002 | Pending |
 | [TASK-0003](./TASK-0003-watcher-with-stable-file-debounce-single-dir-pattern-from-config.md) | Watcher with stable-file debounce (single dir, pattern from config) | @you | P1 | EPIC-0001 | Pending |
 | [TASK-0004](./TASK-0004-sha256-hasher-and-json-ledger-idempotency.md) | SHA256 hasher and JSON ledger (idempotency) | @you | P1 | EPIC-0002 | Pending |
