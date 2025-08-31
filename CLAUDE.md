@@ -13,6 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 @./.claude/agents/documentation-generator.md
 @./.claude/agents/02-language-specialists/python-pro.md
 @./.claude/agents/05-data-ai/data-engineer.md
+@./.claude/agents/06-developer-experience/documentation-engineer.md
 
 ## Project Overview
 
