@@ -1,6 +1,6 @@
 ---
 id: TASK-0009
-title: Move processed to ./processed/ and quarantine failures
+title: Move processed to ./data/processed/ and quarantine failures
 status: Pending
 priority: P1
 owner: @you
@@ -17,7 +17,7 @@ require_confirm: []
 
 ## Summary
 
-On success move to processed/; on failure move to quarantine/ with a reason file.
+On success move to data/processed/; on failure move to data/quarantine/ with a reason file.
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ On success move to processed/; on failure move to quarantine/ with a reason file
 
 ## Objective (Outcomes)
 
-- On success move to processed/; on failure move to quarantine/ with a reason file.
+- On success move to data/processed/; on failure move to data/quarantine/ with a reason file.
 
 ## Scope
 
@@ -57,7 +57,7 @@ None specified.
 
 ## Acceptance Criteria
 
-- Given a failure, Then input ends in quarantine/ and reason.txt contains the error summary
+- Given a failure, Then input ends in data/quarantine/ and reason.txt contains the error summary
 
 ## Verification
 

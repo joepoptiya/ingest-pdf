@@ -17,7 +17,7 @@ require_confirm: []
 
 ## Summary
 
-Compute SHA256; consult and update ./state/ledger.json to avoid duplicates.
+Compute SHA256; consult and update ./ops/state/ledger.json to avoid duplicates.
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ Compute SHA256; consult and update ./state/ledger.json to avoid duplicates.
 
 ## Objective (Outcomes)
 
-- Compute SHA256; consult and update ./state/ledger.json to avoid duplicates.
+- Compute SHA256; consult and update ./ops/state/ledger.json to avoid duplicates.
 
 ## Scope
 

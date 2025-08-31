@@ -3,6 +3,7 @@
 import json
 import logging
 from pathlib import Path
+from typing import Any
 
 from .exceptions import PDFProcessingError
 from .extractor import PDFExtractor
@@ -13,20 +14,17 @@ logger = logging.getLogger(__name__)
 class PDFProcessor:
     """Process and ingest PDF files."""
 
-    def __init__(
-        self, output_dir: Path | None = None, use_pdfplumber: bool = True
-    ) -> None:
+    def __init__(self, output_dir: Path | None = None) -> None:
         """Initialize the PDF processor.
 
         Args:
             output_dir: Directory to save processed results. If None, uses current directory.
-            use_pdfplumber: Whether to use pdfplumber for extraction.
         """
         self.output_dir = output_dir or Path(".")
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.extractor = PDFExtractor(use_pdfplumber=use_pdfplumber)
+        self.extractor = PDFExtractor()
 
-    def process_file(self, pdf_path: str | Path) -> dict[str, str | int | dict]:
+    def process_file(self, pdf_path: str | Path) -> dict[str, Any]:
         """Process a single PDF file.
 
         Args:
@@ -68,7 +66,7 @@ class PDFProcessor:
 
     def process_directory(
         self, directory_path: str | Path, recursive: bool = False
-    ) -> list[dict[str, str | int | dict]]:
+    ) -> list[dict[str, Any]]:
         """Process all PDF files in a directory.
 
         Args:
@@ -119,7 +117,9 @@ class PDFProcessor:
             raise PDFProcessingError(error_msg) from e
 
     def save_results(
-        self, results: dict | list[dict], output_file: str | None = None
+        self,
+        results: dict[str, Any] | list[dict[str, Any]],
+        output_file: str | None = None,
     ) -> Path:
         """Save processing results to a JSON file.
 

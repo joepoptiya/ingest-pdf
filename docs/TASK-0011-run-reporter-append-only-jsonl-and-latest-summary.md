@@ -17,7 +17,7 @@ require_confirm: []
 
 ## Summary
 
-Write per-run JSONL under ./runs and a ./runs/latest.json with counts (processed, failed, skipped).
+Write per-run JSONL under ./ops/runs and a ./ops/runs/latest.json with counts (processed, failed, skipped).
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ Write per-run JSONL under ./runs and a ./runs/latest.json with counts (processed
 
 ## Objective (Outcomes)
 
-- Write per-run JSONL under ./runs and a ./runs/latest.json with counts (processed, failed, skipped).
+- Write per-run JSONL under ./ops/runs and a ./ops/runs/latest.json with counts (processed, failed, skipped).
 
 ## Scope
 

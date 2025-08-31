@@ -2,7 +2,7 @@
 
 [input]
 # Directory to watch for new PDF files
-dir = "./inbox"
+dir = "./data/inbox"
 # File pattern to match (glob pattern)
 pattern = "*.pdf"
 # File type to process
@@ -11,10 +11,10 @@ file_type = "pdf"
 [output]
 # JSONL output directory template
 # Available placeholders: {stem}, {hash}, {ts}
-jsonl_dir = "./outputs/jsonl/{stem}-{hash}.jsonl"
+jsonl_dir = "./data/outputs/jsonl/{stem}-{hash}.jsonl"
 # Markdown output directory template
 # Available placeholders: {stem}, {hash}, {ts}
-markdown_dir = "./outputs/markdown/{stem}-{hash}.md"
+markdown_dir = "./data/outputs/markdown/{stem}-{hash}.md"
 
 [llamaparse]
 # LlamaParse API key (can be set via LLAMAPARSE_API_KEY environment variable)
@@ -26,13 +26,13 @@ timeout = 120
 
 [processed]
 # Directory to move successfully processed files
-dir = "./processed"
+dir = "./data/processed"
 # Whether to overwrite files with duplicate names
 overwrite_on_dup = true
 
 [quarantine]
 # Directory to move failed files
-dir = "./quarantine"
+dir = "./data/quarantine"
 
 [concurrency]
 # Maximum number of worker threads for processing
@@ -64,8 +64,8 @@ backup_count = 7
 
 [state]
 # Directory for state files (ledger.json)
-dir = "./state"
+dir = "./ops/state"
 
 [runs]
 # Directory for run reports
-dir = "./runs"
+dir = "./ops/runs"
