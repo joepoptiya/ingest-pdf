@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-if [[ -z "${VIRTUAL_ENV:-}" && ! -d ".venv" ]]; then
-  # Allow read-only scripts to run via 'uv run' automatically; nudge users
-  # to use uv run consistently so installs never leak globally.
-  :
-fi
 args="${*:-}"
 if echo " $args " | grep -Eq '[[:space:]]-m[[:space:]](pip|venv)([[:space:]]|$)'; then
   >&2 echo "Blocked: use uv. Run: uv init && uv venv; then uv add <pkg> / uv run ..."
