@@ -1,5 +1,8 @@
 # PDF Ingestion Pipeline Configuration
 
+[version]
+app_version = "0.1.0"
+
 [input]
 # Directory to watch for new PDF files
 dir = "./data/inbox"
