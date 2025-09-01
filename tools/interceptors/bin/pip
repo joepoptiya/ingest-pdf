@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+>&2 echo "Blocked: use uv instead of pip."
+if [[ -z "${VIRTUAL_ENV:-}" && ! -d ".venv" ]]; then
+  >&2 echo "No project venv found. Run: uv init && uv venv"
+fi
+>&2 echo "Examples: uv add <package>  |  uv pip install -r requirements.txt"
+exit 2
