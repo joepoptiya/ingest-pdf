@@ -5,6 +5,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from utils.context import RunContext
+
 from .exceptions import PDFProcessingError
 from .extractor import PDFExtractor
 
@@ -14,15 +16,17 @@ logger = logging.getLogger(__name__)
 class PDFProcessor:
     """Process and ingest PDF files."""
 
-    def __init__(self, output_dir: Path | None = None) -> None:
+    def __init__(self, output_dir: Path | None = None, run_context: RunContext | None = None) -> None:
         """Initialize the PDF processor.
 
         Args:
             output_dir: Directory to save processed results. If None, uses current directory.
+            run_context: Run context containing run_id and other shared state.
         """
         self.output_dir = output_dir or Path(".")
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.extractor = PDFExtractor()
+        self.run_context = run_context or RunContext.create()
+        self.extractor = PDFExtractor(run_context=self.run_context)
 
     def process_file(self, pdf_path: str | Path) -> dict[str, Any]:
         """Process a single PDF file.
@@ -39,7 +43,7 @@ class PDFProcessor:
         pdf_path = Path(pdf_path)
 
         try:
-            logger.info(f"Processing PDF: {pdf_path}")
+            logger.info(f"Processing PDF: {pdf_path} [run_id: {self.run_context.run_id}]")
 
             # Extract text and metadata
             text = self.extractor.extract_text(pdf_path)
@@ -54,9 +58,10 @@ class PDFProcessor:
                 "extracted_text": text,
                 "metadata": metadata,
                 "processed_at": self._get_timestamp(),
+                "run_id": self.run_context.run_id,
             }
 
-            logger.info(f"Successfully processed {pdf_path}")
+            logger.info(f"Successfully processed {pdf_path} [run_id: {self.run_context.run_id}]")
             return results
 
         except Exception as e:
@@ -93,7 +98,7 @@ class PDFProcessor:
                 logger.warning(f"No PDF files found in {directory_path}")
                 return []
 
-            logger.info(f"Found {len(pdf_files)} PDF files to process")
+            logger.info(f"Found {len(pdf_files)} PDF files to process [run_id: {self.run_context.run_id}]")
 
             # Process each file
             results = []
@@ -107,7 +112,7 @@ class PDFProcessor:
                     continue
 
             logger.info(
-                f"Successfully processed {len(results)} out of {len(pdf_files)} PDF files"
+                f"Successfully processed {len(results)} out of {len(pdf_files)} PDF files [run_id: {self.run_context.run_id}]"
             )
             return results
 
@@ -131,15 +136,23 @@ class PDFProcessor:
             Path to the saved file.
         """
         if output_file is None:
-            output_file = f"pdf_processing_results_{self._get_timestamp()}.json"
+            output_file = f"pdf_processing_results_{self.run_context.run_id}_{self._get_timestamp()}.json"
 
         output_path = self.output_dir / output_file
 
         try:
+            # Add run_id to results if not already present
+            if isinstance(results, dict) and "run_id" not in results:
+                results["run_id"] = self.run_context.run_id
+            elif isinstance(results, list):
+                for result in results:
+                    if isinstance(result, dict) and "run_id" not in result:
+                        result["run_id"] = self.run_context.run_id
+
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(results, f, indent=2, ensure_ascii=False)
 
-            logger.info(f"Results saved to {output_path}")
+            logger.info(f"Results saved to {output_path} [run_id: {self.run_context.run_id}]")
             return output_path
 
         except Exception as e:

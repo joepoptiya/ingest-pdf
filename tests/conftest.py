@@ -1,5 +1,6 @@
 """Test configuration and fixtures."""
 
+import logging
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
@@ -7,6 +8,17 @@ from pathlib import Path
 import pytest
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+
+
+@pytest.fixture(autouse=True)
+def disable_console_logging():
+    """Disable console logging during tests to avoid cluttering output."""
+    # Set a flag to indicate we're in test mode
+    logging._in_test_mode = True
+    yield
+    # Clean up
+    if hasattr(logging, '_in_test_mode'):
+        delattr(logging, '_in_test_mode')
 
 
 @pytest.fixture

@@ -26,6 +26,8 @@ api_key = ""
 base_url = "https://api.llamaindex.ai/api/v1"
 # Request timeout in seconds
 timeout = 120
+verbose = false
+premium_mode = true
 
 [processed]
 # Directory to move successfully processed files

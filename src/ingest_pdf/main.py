@@ -6,16 +6,23 @@ from pathlib import Path
 
 import click
 
+from utils.context import RunContext
+
 from . import __version__
-#from .config import ConfigLoader, get_config
-from .config import settings, reload_settings
+from .config import ConfigLoader, get_config, settings
 from .exceptions import PDFProcessingError
 from .processor import PDFProcessor
 
 CFG = settings()
 
-def setup_logging(verbose: bool = False, config_path: str | None = None) -> None:
-    """Set up logging configuration using config settings."""
+def setup_logging(verbose: bool = False, config_path: str | None = None, run_id: str | None = None) -> None:
+    """Set up logging configuration using config settings.
+    
+    Args:
+        verbose: Enable debug logging
+        config_path: Path to config file
+        run_id: Run ID to include in log messages
+    """
     try:
         # Initialize config loader if config_path provided
         if config_path:
@@ -33,15 +40,25 @@ def setup_logging(verbose: bool = False, config_path: str | None = None) -> None
         log_dir = Path(config.logging.dir)
         log_dir.mkdir(parents=True, exist_ok=True)
 
+        # Configure logging format with run_id if provided
+        log_format = "%(asctime)s - %(name)s - %(levelname)s"
+        if run_id:
+            log_format += f" - [run_id:{run_id}]"
+        log_format += " - %(message)s"
+
         # Configure logging
+        handlers = [logging.FileHandler(log_dir / "pdf-ingestor.log")]
+
+        # Only add console handler if not in testing mode
+        if not hasattr(logging, '_in_test_mode'):
+            handlers.append(logging.StreamHandler())
+
         logging.basicConfig(
             level=level,
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            format=log_format,
             datefmt="%Y-%m-%d %H:%M:%S",
-            handlers=[
-                logging.StreamHandler(),
-                logging.FileHandler(log_dir / "pdf-ingestor.log"),
-            ],
+            handlers=handlers,
+            force=True,  # Override existing configuration
         )
 
         # Log config info
@@ -49,14 +66,29 @@ def setup_logging(verbose: bool = False, config_path: str | None = None) -> None
         logger.info(
             f"Logging configured: level={logging.getLevelName(level)}, dir={log_dir}"
         )
+        if run_id:
+            logger.info(f"Run ID: {run_id}")
 
     except Exception as e:
         # Fallback to basic logging if config fails
         level = logging.DEBUG if verbose else logging.INFO
+        log_format = "%(asctime)s - %(name)s - %(levelname)s"
+        if run_id:
+            log_format += f" - [run_id:{run_id}]"
+        log_format += " - %(message)s"
+
+        handlers = []
+
+        # Only add console handler if not in testing mode
+        if not hasattr(logging, '_in_test_mode'):
+            handlers.append(logging.StreamHandler())
+
         logging.basicConfig(
             level=level,
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            format=log_format,
             datefmt="%Y-%m-%d %H:%M:%S",
+            handlers=handlers,
+            force=True,
         )
         logging.getLogger(__name__).warning(f"Failed to setup logging from config: {e}")
 
@@ -74,10 +106,18 @@ def setup_logging(verbose: bool = False, config_path: str | None = None) -> None
 def cli(ctx: click.Context, verbose: bool, config: str | None, dry_run: bool) -> None:
     """PDF ingestion and processing tool."""
     ctx.ensure_object(dict)
+
+    # Create RunContext for this session
+    run_context = RunContext.create(dry_run=dry_run, verbose=verbose)
+
+    # Store context and run_context in click context
     ctx.obj["verbose"] = verbose
     ctx.obj["config_path"] = config
     ctx.obj["dry_run"] = dry_run
-    setup_logging(verbose, config)
+    ctx.obj["run_context"] = run_context
+
+    # Setup logging with run_id
+    setup_logging(verbose, config, run_context.run_id)
 
 
 @cli.command()
@@ -97,11 +137,12 @@ def process(
     output_dir: Path | None,
     save_results: bool,
     text_only: bool,
-    use_pypdf2: bool,
 ) -> None:
     """Process a single PDF file."""
+    run_context = ctx.obj["run_context"]
+
     try:
-        processor = PDFProcessor(output_dir=output_dir, use_pdfplumber=not use_pypdf2)
+        processor = PDFProcessor(output_dir=output_dir, run_context=run_context)
 
         if text_only:
             text = processor.extract_text_only(pdf_path)
@@ -141,11 +182,12 @@ def batch(
     output_dir: Path | None,
     recursive: bool,
     save_results: bool,
-    use_pypdf2: bool,
 ) -> None:
     """Process all PDF files in a directory."""
+    run_context = ctx.obj["run_context"]
+
     try:
-        processor = PDFProcessor(output_dir=output_dir, use_pdfplumber=not use_pypdf2)
+        processor = PDFProcessor(output_dir=output_dir, run_context=run_context)
 
         results = processor.process_directory(directory_path, recursive=recursive)
 
@@ -171,8 +213,10 @@ def batch(
 @click.pass_context
 def info(ctx: click.Context, pdf_path: Path) -> None:
     """Get basic information about a PDF file."""
+    run_context = ctx.obj["run_context"]
+
     try:
-        processor = PDFProcessor()
+        processor = PDFProcessor(run_context=run_context)
         file_info = processor.get_file_info(pdf_path)
 
         click.echo("PDF File Information:")
@@ -190,11 +234,13 @@ def info(ctx: click.Context, pdf_path: Path) -> None:
 @click.argument("page_number", type=int)
 @click.pass_context
 def page(
-    ctx: click.Context, pdf_path: Path, page_number: int, use_pypdf2: bool
+    ctx: click.Context, pdf_path: Path, page_number: int
 ) -> None:
     """Extract text from a specific page (0-indexed)."""
+    run_context = ctx.obj["run_context"]
+
     try:
-        processor = PDFProcessor(use_pdfplumber=not use_pypdf2)
+        processor = PDFProcessor(run_context=run_context)
         text = processor.extractor.extract_page_text(pdf_path, page_number)
         click.echo(text)
 
@@ -207,7 +253,8 @@ def page(
 @click.pass_context
 def watch(ctx: click.Context) -> None:
     """Start watching directory for new PDFs."""
-    dry_run = ctx.obj.get("dry_run", False)
+    run_context = ctx.obj["run_context"]
+    dry_run = run_context.dry_run
 
     try:
         config = get_config()
@@ -237,7 +284,8 @@ def watch(ctx: click.Context) -> None:
 @click.pass_context
 def ingest_once(ctx: click.Context) -> None:
     """Process files once (no watching)."""
-    dry_run = ctx.obj.get("dry_run", False)
+    run_context = ctx.obj["run_context"]
+    dry_run = run_context.dry_run
 
     try:
         config = get_config()
@@ -263,7 +311,8 @@ def ingest_once(ctx: click.Context) -> None:
 @click.pass_context
 def reprocess(ctx: click.Context) -> None:
     """Reprocess files from ledger."""
-    dry_run = ctx.obj.get("dry_run", False)
+    run_context = ctx.obj["run_context"]
+    dry_run = run_context.dry_run
 
     try:
         config = get_config()
