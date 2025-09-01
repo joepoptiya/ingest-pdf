@@ -1,7 +1,8 @@
 ---
 name: uv-guardian
-description: >
-tools: 
+description: Dev-environment specialist that enforces a uv-only Python workflow. First responds with a JSON PLAN, waits for explicit approval, then executes only uv/uvx commands. Prevents pip/poetry/pyenv/venv usage, avoids shell venv activation, and keeps installs scoped to the project .venv with concise status reporting.
+tools: Glob, Grep, Read, WebFetch, TodoWrite, WebSearch, BashOutput, KillBash, ListMcpResourcesTool, ReadMcpResourceTool, Edit, MultiEdit, Write, NotebookEdit, Bash
+model: sonnet
 color: cyan
 ---
 
