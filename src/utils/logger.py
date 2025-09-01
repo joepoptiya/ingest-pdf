@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pythonjsonlogger import jsonlogger
 
-from . import config
+from config import settings
 
 
 class JobNameFilter(logging.Filter):
@@ -20,13 +20,22 @@ class JobNameFilter(logging.Filter):
         return True
 
 
-def json_setup_logger(job_name: str, log_name: str = config.LOG_FILE_NAME, log_dir: str = config.LOG_DIR):
+def json_setup_logger(job_name: str, log_name: str = None, log_dir: str = None):
+    # Get configuration
+    cfg = settings()
+    
+    # Set defaults from config if not provided
+    if log_name is None:
+        log_name = "pdf_extract"  # Default log name
+    if log_dir is None:
+        log_dir = cfg['logging']['dir']
+    
     # Ensure the 'logs' directory exists
     Path(log_dir).mkdir(parents=True, exist_ok=True)
 
     # Create a logger
     logger = logging.getLogger(log_name)
-    logger.setLevel(config.LOGGING_LEVEL)  # Use the logging level from config
+    logger.setLevel(cfg['logging']['level'])  # Use the logging level from config
 
     # Create a file handler with TimedRotatingFileHandler
     handler = TimedRotatingFileHandler(
@@ -51,19 +60,28 @@ def json_setup_logger(job_name: str, log_name: str = config.LOG_FILE_NAME, log_d
     # Optionally add console handler
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(json_format)
-    console_handler.setLevel(config.LOGGING_LEVEL)
+    console_handler.setLevel(cfg['logging']['level'])
     logger.addHandler(console_handler)
 
     return logger
 
 
-def setup_logger(job_name: str, log_name: str = config.LOG_FILE_NAME, log_dir: str = config.LOG_DIR):
+def setup_logger(job_name: str, log_name: str = None, log_dir: str = None):
+    # Get configuration
+    cfg = settings()
+    
+    # Set defaults from config if not provided
+    if log_name is None:
+        log_name = "pdf_extract"  # Default log name
+    if log_dir is None:
+        log_dir = cfg['logging']['dir']
+    
     # Ensure the 'logs' directory exists
     Path(log_dir).mkdir(parents=True, exist_ok=True)
 
     # Create a logger
     logger = logging.getLogger(log_name)
-    logger.setLevel(config.LOGGING_LEVEL)
+    logger.setLevel(cfg['logging']['level'])
 
     # Get the current timestamp
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -91,7 +109,7 @@ def setup_logger(job_name: str, log_name: str = config.LOG_FILE_NAME, log_dir: s
     # Optionally add console handler as well
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
-    console_handler.setLevel(config.LOGGING_LEVEL)
+    console_handler.setLevel(cfg['logging']['level'])
     logger.addHandler(console_handler)
 
     return logger
