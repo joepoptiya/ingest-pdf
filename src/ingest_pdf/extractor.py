@@ -14,6 +14,8 @@ from tenacity import (
     wait_exponential,
 )
 
+from utils.context import RunContext
+
 from .exceptions import PDFExtractionError, PDFNotFoundError, PDFReadError
 
 logger = logging.getLogger(__name__)
@@ -22,15 +24,20 @@ logger = logging.getLogger(__name__)
 class PDFExtractor:
     """Extract text and metadata from PDF files using LlamaParse."""
 
-    def __init__(self) -> None:
+    def __init__(self, run_context: RunContext | None = None) -> None:
         """Initialize the PDF extractor with LlamaParse.
 
+        Args:
+            run_context: Run context containing run_id and other shared state.
+            
         Environment Variables Required:
             LLAMA_CLOUD_API_KEY: API key for LlamaParse service
 
         Raises:
             PDFExtractionError: If API key is not configured
         """
+        self.run_context = run_context or RunContext.create()
+
         api_key = os.getenv("LLAMA_CLOUD_API_KEY")
         if not api_key:
             raise PDFExtractionError(
@@ -41,7 +48,7 @@ class PDFExtractor:
             api_key=api_key,
             result_type="markdown",  # Can be "markdown" or "text"
             language="en",
-            verbose=True,
+            verbose=self.run_context.verbose,
         )
 
     def extract_text(self, pdf_path: Path) -> str:
@@ -87,7 +94,7 @@ class PDFExtractor:
             PDFReadError: If LlamaParse cannot process the PDF.
         """
         try:
-            logger.info(f"Processing PDF with LlamaParse: {pdf_path}")
+            logger.info(f"Processing PDF with LlamaParse: {pdf_path} [run_id: {self.run_context.run_id}]")
 
             # Load and parse the document
             documents = self.parser.load_data(str(pdf_path))
@@ -104,13 +111,13 @@ class PDFExtractor:
 
             result = "\n\n".join(text_parts)
             logger.info(
-                f"Successfully extracted {len(result)} characters from {pdf_path}"
+                f"Successfully extracted {len(result)} characters from {pdf_path} [run_id: {self.run_context.run_id}]"
             )
 
             return result
 
         except Exception as e:
-            logger.error(f"LlamaParse extraction failed for {pdf_path}: {e}")
+            logger.error(f"LlamaParse extraction failed for {pdf_path}: {e} [run_id: {self.run_context.run_id}]")
             raise PDFReadError(f"Cannot read PDF with LlamaParse: {e}") from e
 
     def extract_metadata(self, pdf_path: Path) -> dict[str, Any]:

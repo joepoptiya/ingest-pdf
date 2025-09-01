@@ -18,11 +18,12 @@ class TestPDFExtractor:
         with patch("ingest_pdf.extractor.LlamaParse") as mock_llama_parse:
             extractor = PDFExtractor()
             assert extractor.parser is not None
+            # The verbose parameter now comes from the run_context, which defaults to False
             mock_llama_parse.assert_called_once_with(
                 api_key="test-api-key",
                 result_type="markdown",
                 language="en",
-                verbose=True,
+                verbose=False,
             )
 
     def test_init_without_api_key(self):
