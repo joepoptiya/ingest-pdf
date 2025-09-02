@@ -10,12 +10,12 @@ JsonOutput: file path to the json file
 MarkdownOutput: file path to the markdown file
 """
 
-class PdfExtractModel(BaseModel):
+class PdfIngestionRequest(BaseModel):
     PdfInput: str
     JsonOutput: str
     MarkdownOutput: str
 
-class PdfExtractResult(BaseModel):
+class PdfIngestionResult(BaseModel):
     PdfInput: str
     JsonOutput: str
     MarkdownOutput: str

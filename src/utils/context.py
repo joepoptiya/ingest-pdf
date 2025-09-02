@@ -14,9 +14,9 @@ class RunContext:
     verbose: bool = False
 
     @classmethod
-    def create(cls, dry_run: bool = False, verbose: bool = False) -> 'RunContext':
+    def create(cls, length: int = 10, dry_run: bool = False, verbose: bool = False) -> 'RunContext':
         """Create a new RunContext with generated run_id."""
-        cuid_generator = Cuid(length=10)
+        cuid_generator = Cuid(length=length)
         return cls(
             run_id=cuid_generator.generate(),
             dry_run=dry_run,

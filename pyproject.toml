@@ -39,6 +39,7 @@ dependencies = [
     "black>=25.1.0",
     "pytest>=8.4.1",
     "cuid2>=2.0.1",
+    "python-json-logger>=3.3.0",
 ]
 
 [project.optional-dependencies]
