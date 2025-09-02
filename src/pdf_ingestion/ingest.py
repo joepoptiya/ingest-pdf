@@ -10,7 +10,7 @@ from utils.logger import json_setup_logger
 from utils.context import RunContext
 
 from config import settings, reload_settings
-from pdf_extract.models import PdfExtractModel
+from pdf_ingestion.models import PdfIngestionRequest
 
 CFG = settings()
 reload_settings()
@@ -18,15 +18,15 @@ reload_settings()
 load_dotenv()
 nest_asyncio.apply()
 
-class PDFExtractor:
-    def __init__(self, model: PdfExtractModel, context: RunContext = None):
+class ingest:
+    def __init__(self, run_id: str):
         # Use provided context or create new one
-        self.context = context if context else RunContext.create(dry_run=False, verbose=True)
-        self.RUN_ID = self.context.run_id  # Use context run_id for consistency
-        self.logger = json_setup_logger(f"pdf_extract_{self.RUN_ID}")
-        self.model = model
+        #self.context = context if context else RunContext.create(dry_run=False, verbose=True)
+        self.RUN_ID = run_id
+        self.logger = json_setup_logger(job_name=f"{self.RUN_ID}", log_name=f"_pdf_ingestion_{self.RUN_ID}")
+        self.logger.info("PDFIngestion initialized", extra={"run_id": self.RUN_ID})
+        #self.model = model
         self.inbox = CFG['input']['dir']
-        print(self.inbox)
         self.parser = LlamaParse(
             verbose=CFG['llamaparse']['verbose'],
             premium_mode=CFG['llamaparse']['premium_mode']
@@ -43,7 +43,7 @@ class PDFExtractor:
         self._OUTPUT_JSON_DIR.mkdir(parents=True, exist_ok=True)
         self._OUTPUT_MARKDOWN_DIR.mkdir(parents=True, exist_ok=True)
 
-    def run(self):
+    def run(self, req: PdfIngestionRequest):
         self.logger.info("Starting PDF extraction workflow", extra={"run_id": self.RUN_ID})
         
         try:

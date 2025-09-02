@@ -26,7 +26,7 @@ def json_setup_logger(job_name: str, log_name: str = None, log_dir: str = None):
     
     # Set defaults from config if not provided
     if log_name is None:
-        log_name = "pdf_extract"  # Default log name
+        log_name = log_name or "pdf_extract"  # Default log name
     if log_dir is None:
         log_dir = cfg['logging']['dir']
     
@@ -58,10 +58,11 @@ def json_setup_logger(job_name: str, log_name: str = None, log_dir: str = None):
     logger.addHandler(handler)
 
     # Optionally add console handler
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(json_format)
-    console_handler.setLevel(cfg['logging']['level'])
-    logger.addHandler(console_handler)
+    if cfg['logging'].get('console', True):
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(json_format)
+        console_handler.setLevel(cfg['logging']['level'])
+        logger.addHandler(console_handler)
 
     return logger
 
@@ -107,9 +108,10 @@ def setup_logger(job_name: str, log_name: str = None, log_dir: str = None):
     logger.addHandler(handler)
 
     # Optionally add console handler as well
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    console_handler.setLevel(cfg['logging']['level'])
-    logger.addHandler(console_handler)
+    if cfg['logging'].get('console', True):
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        console_handler.setLevel(cfg['logging']['level'])
+        logger.addHandler(console_handler)
 
     return logger
